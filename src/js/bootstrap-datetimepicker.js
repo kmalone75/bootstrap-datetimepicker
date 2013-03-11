@@ -53,7 +53,7 @@
       this.pickDate = options.pickDate;
       this.pickTime = options.pickTime;
       this.isInput = this.$element.is('input');
-      this.setCurrentTime = this.options.setCurrentTime;
+      this.setCurrentTime = options.setCurrentTime;
       this.component = false;
       if (this.$element.is('.input-append') || this.$element.is('.input-prepend'))
           this.component = this.$element.find('.add-on');
@@ -204,17 +204,12 @@
     },
 
     getTimeToSet: function(date) {
-      var hour = (this.setCurrentTime) ? date.getUTCHours() : 0,
-          minute = (this.setCurrentTime) ? date.getUTCMinutes() : 0,
-          second = (this.setCurrentTime) ? date.getUTCSeconds() : 0,
-          millisecond = (this.setCurrentTime) ? date.getUTCMilliseconds() : 0;
-
-          return {
-            hour: hour,
-            minute: minute,
-            second: second,
-            millisecond: millisecond
-          };
+      return {
+        hour: (this.setCurrentTime) ? date.getUTCHours() : 0,
+        minute: (this.setCurrentTime) ? date.getUTCMinutes() : 0,
+        second: (this.setCurrentTime) ? date.getUTCSeconds() : 0,
+        millisecond: (this.setCurrentTime) ? date.getUTCMilliseconds() : 0
+      };
     },
 
     setDate: function(date) {
@@ -315,10 +310,10 @@
           this._date = UTCDate(tmp.getFullYear(),
                               tmp.getMonth(),
                               tmp.getDate(),
-                              time.hour,
-                              time.minute,
-                              time.second,
-                              time.millisecond);
+                              (time.hour) ? tmp.getHours() : time.hour,
+                              (time.minute) ? tmp.getMinutes() : time.minute,
+                              (time.second) ? tmp.getSeconds() : time.second,
+                              (time.millisecond) ? tmp.getMilliseconds() : time.millisecond);
         } else {
           this._date = this.parseDate(dateStr);
         }
@@ -551,6 +546,7 @@
       e.preventDefault();
       this._unset = false;
       var target = $(e.target).closest('span, td, th');
+      var time = this.getTimeToSet(this._date);
       if (target.length === 1) {
         if (! target.is('.disabled')) {
           switch(target[0].nodeName.toLowerCase()) {
@@ -584,10 +580,10 @@
                   this.viewDate.getUTCFullYear(),
                   this.viewDate.getUTCMonth(),
                   this.viewDate.getUTCDate(),
-                  this._date.getUTCHours(),
-                  this._date.getUTCMinutes(),
-                  this._date.getUTCSeconds(),
-                  this._date.getUTCMilliseconds()
+                  time.hour,
+                  time.minute,
+                  time.second,
+                  time.millisecond
                 );
                 this.notifyChange();
               }
@@ -597,13 +593,12 @@
               break;
             case 'td':
               if (target.is('.day')) {
-                // default time to current based on options
+                // set time based on setCurrentTime options
                 this.setCurrentTime = this.options.setCurrentTime;
 
                 var day = parseInt(target.text(), 10) || 1;
                 var month = this.viewDate.getUTCMonth();
                 var year = this.viewDate.getUTCFullYear();
-                var time = this.getTimeToSet(this._date);
                 if (target.is('.old')) {
                   if (month === 0) {
                     month = 11;
@@ -634,36 +629,51 @@
 
     actions: {
       incrementHours: function(e) {
-        this._date.setUTCHours(this._date.getUTCHours() + 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCHours(this._date.getUTCHours() + 1);
       },
 
       incrementMinutes: function(e) {
-        this._date.setUTCMinutes(this._date.getUTCMinutes() + 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCMinutes(this._date.getUTCMinutes() + 1);
       },
 
       incrementSeconds: function(e) {
-        this._date.setUTCSeconds(this._date.getUTCSeconds() + 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCSeconds(this._date.getUTCSeconds() + 1);
       },
 
       decrementHours: function(e) {
-        this._date.setUTCHours(this._date.getUTCHours() - 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCHours(this._date.getUTCHours() - 1);
       },
 
       decrementMinutes: function(e) {
-        this._date.setUTCMinutes(this._date.getUTCMinutes() - 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCMinutes(this._date.getUTCMinutes() - 1);
       },
 
       decrementSeconds: function(e) {
-        this._date.setUTCSeconds(this._date.getUTCSeconds() - 1);
+        // setCurrentTime should be true when using increment/decrement
         this.setCurrentTime = true;
+
+        this._date.setUTCSeconds(this._date.getUTCSeconds() - 1);
       },
 
       togglePeriod: function(e) {
+        // setCurrentTime should be true when toggline AM/PM
+        this.setCurrentTime = true;
+
         var hour = this._date.getUTCHours();
         if (hour >= 12) hour -= 12;
         else hour += 12;
@@ -1096,7 +1106,7 @@
     pickSeconds: true,
     startDate: -Infinity,
     endDate: Infinity,
-    currentTime: true
+    setCurrentTime: true
   };
   $.fn.datetimepicker.Constructor = DateTimePicker;
   var dpgId = 0;
