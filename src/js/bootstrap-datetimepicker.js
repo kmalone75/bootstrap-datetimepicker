@@ -215,6 +215,10 @@
     setDate: function(date) {
       if (!date) this.setValue(null);
       else this.setValue(date.valueOf());
+
+      // setCurrentTime should be true
+      this.setCurrentTime = true;
+      this.update();
     },
     
     setStartDate: function(date) {
@@ -267,6 +271,10 @@
           localDate.getMinutes(),
           localDate.getSeconds(),
           localDate.getMilliseconds()));
+
+      // setCurrentTime should be true
+      this.setCurrentTime = true;
+      this.update();
     },
 
     place: function(){
